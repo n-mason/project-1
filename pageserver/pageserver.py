@@ -23,6 +23,8 @@ log = logging.getLogger(__name__)
 import socket    # Basic TCP/IP communication on the internet
 import _thread   # Response computation runs concurrently with main program
 
+import os        # Allows path to file requested to be checked
+
 
 def listen(portnum):
     """
@@ -90,9 +92,37 @@ def respond(sock):
     log.info("Request was {}\n***\n".format(request))
 
     parts = request.split()
+
     if len(parts) > 1 and parts[0] == "GET":
-        transmit(STATUS_OK, sock)
-        transmit(CAT, sock)
+        #transmit(STATUS_OK, sock)
+        #if file exists in pages/ transmit STATUS_OK followed by file
+        path_to_check = "." + str(parts[1])
+        
+        log.info("Path to check is on the next line...")
+        log.info(path_to_check)
+        log.info("\n")
+
+        if os.path.exists(path_to_check):
+            transmit(STATUS_OK, sock)
+            #then transmit file to sock, so need to open and then send the file contents
+            file = open(path_to_check, "r")
+            file_contents = file.read()
+            transmit(file_contents, sock)
+            file.close()
+
+        #else if file does not exist transmit STATUS_NOT_FOUND followed by info msg in the body    
+        else:
+            transmit(STATUS_NOT_FOUND, sock)
+            #then transmit info msg
+            not_found_bdy_msg = "The file requested does not exist in the ./pages directory\n"
+            transmit(not_found_bdy_msg, sock)
+            
+        #else if request contains .. or ~ then transmit STATUS_FORBIDDEN followed by info msg in the body
+        if (".." in path_to_check) or ("~" in path_to_check):
+            transmit(STATUS_FORBIDDEN, sock)
+            forb_bdy_msg = "The characters .. and ~ are not allowed in the client request\n"
+            transmit(forb_bdy_msg, sock)
+        #transmit(CAT, sock)
     else:
         log.info("Unhandled request: {}".format(request))
         transmit(STATUS_NOT_IMPLEMENTED, sock)
