@@ -6,9 +6,8 @@
   error handling and many other things to keep the illustration as simple
   as possible.
 
-  FIXME:
-  Currently this program always serves an ascii graphic of a cat.
-  Change it to serve files if they end with .html or .css, and are
+  This program used to serve an ascii graphic of a cat.
+  It has been changed so that now it serves files if they end with .html or .css, and are
   located in ./pages  (where '.' is the directory from which this
   program is run).
 """
@@ -83,7 +82,7 @@ STATUS_NOT_IMPLEMENTED = "HTTP/1.0 401 Not Implemented\n\n"
 def respond(sock):
     """
     This server responds only to GET requests (not PUT, POST, or UPDATE).
-    Any valid GET request is answered with an ascii graphic of a cat.
+    Any valid GET request is answered with the appropriate HTTP response code and body msg.
     """
     sent = 0
     request = sock.recv(1024)  # We accept only short requests
@@ -95,33 +94,34 @@ def respond(sock):
 
     if len(parts) > 1 and parts[0] == "GET":
         #transmit(STATUS_OK, sock)
-        #if file exists in pages/ transmit STATUS_OK followed by file
         path_to_check = "." + str(parts[1])
         
-        log.info("Path to check is on the next line...")
-        log.info(path_to_check)
-        log.info("\n")
+        #log.info("Path to check is on the next line...")
+        #log.info(path_to_check)
+        #log.info("\n")
 
-        if os.path.exists(path_to_check):
+        # If request contains .. or ~ then transmit STATUS_FORBIDDEN followed by info msg in the body
+        if (".." in path_to_check) or ("~" in path_to_check):
+            transmit(STATUS_FORBIDDEN, sock) 
+            forb_bdy_msg = "The characters .. and ~ are not allowed in the client request\n"
+            transmit(forb_bdy_msg, sock)
+
+        # Else if file exists in pages/ directory, transmit STATUS_OK followed by file
+        elif os.path.exists(path_to_check):
             transmit(STATUS_OK, sock)
-            #then transmit file to sock, so need to open and then send the file contents
+            # Now need to transmit file to sock, so need to open and then send the file contents
             file = open(path_to_check, "r")
             file_contents = file.read()
             transmit(file_contents, sock)
             file.close()
 
-        #else if file does not exist transmit STATUS_NOT_FOUND followed by info msg in the body    
+        # Else if file does not exist, transmit STATUS_NOT_FOUND followed by info msg in the body    
         else:
             transmit(STATUS_NOT_FOUND, sock)
-            #then transmit info msg
+            # Now transmit info msg
             not_found_bdy_msg = "The file requested does not exist in the ./pages directory\n"
             transmit(not_found_bdy_msg, sock)
             
-        #else if request contains .. or ~ then transmit STATUS_FORBIDDEN followed by info msg in the body
-        if (".." in path_to_check) or ("~" in path_to_check):
-            transmit(STATUS_FORBIDDEN, sock)
-            forb_bdy_msg = "The characters .. and ~ are not allowed in the client request\n"
-            transmit(forb_bdy_msg, sock)
         #transmit(CAT, sock)
     else:
         log.info("Unhandled request: {}".format(request))
