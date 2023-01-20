@@ -107,7 +107,7 @@ def respond(sock):
             transmit(forb_bdy_msg, sock)
 
         # Else if file exists in pages/ directory, transmit STATUS_OK followed by file
-        elif os.path.exists(path_to_check):
+        elif os.path.isfile(path_to_check):
             transmit(STATUS_OK, sock)
             # Now need to transmit file to sock, so need to open and then send the file contents
             file = open(path_to_check, "r")
@@ -119,7 +119,7 @@ def respond(sock):
         else:
             transmit(STATUS_NOT_FOUND, sock)
             # Now transmit info msg
-            not_found_bdy_msg = "The file requested does not exist in pages/\n"
+            not_found_bdy_msg = "The file requested does not exist in the pages/ directory\n"
             transmit(not_found_bdy_msg, sock)
             
         #transmit(CAT, sock)
