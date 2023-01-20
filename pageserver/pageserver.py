@@ -7,7 +7,7 @@
   as possible.
 
   This program used to serve an ascii graphic of a cat.
-  It has been changed so that now it serves files if they end with .html or .css, and are
+  It has been changed so that now it serves files if they are
   located in ./pages  (where '.' is the directory from which this
   program is run).
 """
@@ -119,7 +119,7 @@ def respond(sock):
         else:
             transmit(STATUS_NOT_FOUND, sock)
             # Now transmit info msg
-            not_found_bdy_msg = "The file requested does not exist in the ./pages directory\n"
+            not_found_bdy_msg = "The file requested does not exist in pages/\n"
             transmit(not_found_bdy_msg, sock)
             
         #transmit(CAT, sock)
