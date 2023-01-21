@@ -103,7 +103,7 @@ def respond(sock):
         # If request contains .. or ~ then transmit STATUS_FORBIDDEN followed by info msg in the body
         if (".." in path_to_check) or ("~" in path_to_check):
             transmit(STATUS_FORBIDDEN, sock) 
-            forb_bdy_msg = "The characters .. and ~ are not allowed in the client request\n"
+            forb_bdy_msg = "The characters .. and ~ are forbidden in the client request\n"
             transmit(forb_bdy_msg, sock)
 
         # Else if file exists in pages/ directory, transmit STATUS_OK followed by file
@@ -119,7 +119,7 @@ def respond(sock):
         else:
             transmit(STATUS_NOT_FOUND, sock)
             # Now transmit info msg
-            not_found_bdy_msg = "The file requested does not exist in the pages/ directory\n"
+            not_found_bdy_msg = "The file requested was not found in the pages/ directory\n"
             transmit(not_found_bdy_msg, sock)
             
         #transmit(CAT, sock)
