@@ -78,7 +78,6 @@ STATUS_FORBIDDEN = "HTTP/1.0 403 Forbidden\n\n"
 STATUS_NOT_FOUND = "HTTP/1.0 404 Not Found\n\n"
 STATUS_NOT_IMPLEMENTED = "HTTP/1.0 401 Not Implemented\n\n"
 
-
 def respond(sock):
     """
     This server responds only to GET requests (not PUT, POST, or UPDATE).
@@ -94,14 +93,30 @@ def respond(sock):
 
     if len(parts) > 1 and parts[0] == "GET":
         #transmit(STATUS_OK, sock)
-        path_to_check = "." + str(parts[1])
+        """
+        log.info("DOCROOT is...")
+        log.info(docroot);
+        log.info("\n")
+        log.info(parts[1]) #ex: pages/trivia.html
+        """
+        path_split = (parts[1]).rsplit("/")
+        #log.info(path_split)
         
-        #log.info("Path to check is on the next line...")
-        #log.info(path_to_check)
+        file_to_check = path_split[-1] # Need to check for this file inside of DOCROOT 
+        # DOCROOT is defined as the pages/ directory in credentials.ini
+
+        #log.info(file_to_check)
         #log.info("\n")
 
+        path_to_check = docroot + "/" + file_to_check
+        """
+        log.info("Path to check is...")
+        log.info(path_to_check)
+        log.info("\n")
+        """
+        
         # If request contains .. or ~ then transmit STATUS_FORBIDDEN followed by info msg in the body
-        if (".." in path_to_check) or ("~" in path_to_check):
+        if (".." in parts[1]) or ("~" in parts[1]):
             transmit(STATUS_FORBIDDEN, sock) 
             forb_bdy_msg = "The characters .. and ~ are forbidden in the client request\n"
             transmit(forb_bdy_msg, sock)
@@ -162,6 +177,8 @@ def get_options():
                          " Ports 0..1000 are reserved \n" +
                          "by the operating system").format(options.port))
 
+    global docroot
+    docroot = options.DOCROOT
     return options
 
 
