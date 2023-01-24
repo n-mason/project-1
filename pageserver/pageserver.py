@@ -108,7 +108,10 @@ def respond(sock):
         #log.info(file_to_check)
         #log.info("\n")
 
-        path_to_check = docroot + "/" + file_to_check
+        if docroot[-1] is "/": # If DOCROOT already ends with a "/", don't concatenate a "/"
+            path_to_check = docroot + file_to_check 
+        else:
+            path_to_check = docroot + "/" + file_to_check
         """
         log.info("Path to check is...")
         log.info(path_to_check)
